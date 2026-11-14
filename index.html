@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>قائمة الأسعار</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#0b6b4f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="الأسعار">
+<style>
+:root{
+  --bg:#f5f6f4; --surface:#ffffff; --fg:#17201c; --muted:#5d6b64; --line:#dde3df;
+  --accent:#0b6b4f; --on-accent:#ffffff; --bad:#a63a2b;
+  --font:'Geeza Pro','Segoe UI','Noto Naskh Arabic','Arial',sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#111715; --surface:#1a2320; --fg:#e8efeb; --muted:#9aaba3; --line:#2b3732;
+  --accent:#5fd0a5; --on-accent:#08231a; --bad:#ff8b7a; color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:17px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-bottom:calc(32px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:720px;margin:0 auto}
+header{position:sticky;top:0;z-index:5;background:var(--bg);padding-top:calc(12px + env(safe-area-inset-top,0px));padding-bottom:10px}
+h1{font-size:20px;font-weight:800;margin:0 0 10px;display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+h1 small{font-size:13px;font-weight:400;color:var(--muted)}
+.bar{display:flex;gap:8px}
+.box{position:relative;flex:1;min-width:0}
+#q{width:100%;font:600 20px var(--font);color:var(--fg);background:var(--surface);
+  border:2px solid var(--line);border-radius:12px;padding:13px 16px;padding-inline-end:48px;outline:none;-webkit-appearance:none}
+#q:focus{border-color:var(--accent)}
+#clr{position:absolute;inset-block:0;inset-inline-end:4px;width:44px;border:0;background:none;color:var(--muted);font-size:26px}
+#scan{flex:none;border:0;border-radius:12px;background:var(--accent);color:var(--on-accent);font:800 16px var(--font);padding:0 16px;display:flex;align-items:center;gap:8px}
+#scan svg{width:24px;height:24px}
+.meta{color:var(--muted);font-size:14px;padding-block:8px 4px;min-height:1.5em}
+ul{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+li{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid var(--line)}
+li:last-child{border-bottom:0}
+.n{min-width:0;overflow-wrap:anywhere;font-weight:600}
+.p{flex:none;font-weight:800;font-size:20px;color:var(--accent);font-variant-numeric:tabular-nums;white-space:nowrap;direction:ltr}
+.p small{font-size:12px;font-weight:400;color:var(--muted);margin-inline-start:4px}
+.empty{display:block;padding:28px 16px;text-align:center;color:var(--muted)}
+footer{color:var(--muted);font-size:13px;padding-block:14px}
+/* scanner overlay */
+#ov{position:fixed;inset:0;background:#000;z-index:20;display:flex;flex-direction:column;color:#fff}
+#ov[hidden]{display:none}
+#ovtop{display:flex;justify-content:space-between;align-items:center;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px}
+#ovtop b{font-size:18px}
+#stop{border:0;border-radius:10px;background:#ffffff26;color:#fff;font:700 16px var(--font);padding:10px 16px}
+#reader{flex:1;min-height:0;overflow:hidden;position:relative}
+#reader video{width:100%!important;height:100%!important;object-fit:cover}
+#res{background:var(--surface);color:var(--fg);padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));min-height:120px;border-radius:18px 18px 0 0}
+#res .hint{color:var(--muted);text-align:center;padding-top:20px}
+#res .rn{font-weight:800;font-size:19px;overflow-wrap:anywhere}
+#res .rp{font-weight:800;font-size:40px;color:var(--accent);direction:ltr;text-align:right;font-variant-numeric:tabular-nums}
+#res .rp small{font-size:16px;color:var(--muted);font-weight:400;margin-inline-start:6px}
+#res .rb{color:var(--muted);font-size:14px;direction:ltr;text-align:right}
+#res .bad{color:var(--bad);font-weight:800;font-size:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>قائمة الأسعار <small id="upd"></small></h1>
+  <div class="bar">
+    <div class="box">
+      <input id="q" type="search" inputmode="search" enterkeyhint="search" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="اسم المادة أو الباركود" aria-label="بحث عن مادة">
+      <button id="clr" type="button" hidden aria-label="مسح">×</button>
+    </div>
+    <button id="scan" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M8 8v8M12 8v8M16 8v8"/></svg>
+      مسح
+    </button>
+  </div>
+  <div class="meta" id="meta"></div>
+</header>
+<ul id="list"></ul>
+<footer>السعر بالدينار العراقي. اكتب أكثر من كلمة لتضييق النتائج، مثل: <b>شاحن سامسونك</b>.</footer>
+</div>
+
+<div id="ov" hidden>
+  <div id="ovtop"><b>وجّه الكاميرا نحو الباركود</b><button id="stop" type="button">إغلاق</button></div>
+  <div id="reader"></div>
+  <div id="res"><div class="hint">بانتظار الباركود...</div></div>
+</div>
+
+<script src="data.js"></script>
+<script>
+const DATA=window.DATA||[];
+const AR_DIG='٠١٢٣٤٥٦٧٨٩';
+function norm(s){
+  return s.toLowerCase()
+    .replace(/[ً-ٰٟـ]/g,'')
+    .replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/ؤ/g,'و').replace(/ئ/g,'ي')
+    .replace(/[٠-٩]/g,d=>AR_DIG.indexOf(d))
+    .replace(/\s+/g,' ').trim();
+}
+const IDX=DATA.map(r=>norm(r[0]));
+// barcode map (leading zeros stripped so UPC-A and EAN-13 versions of one code match)
+const BC=new Map();
+DATA.forEach((r,i)=>r[2].forEach(b=>{const k=b.replace(/^0+/,'');if(!BC.has(k))BC.set(k,[]);BC.get(k).push(i)}));
+const $=id=>document.getElementById(id);
+const q=$('q'),list=$('list'),meta=$('meta'),clr=$('clr');
+const LIMIT=80, fmt=n=>n.toLocaleString('en-US');
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function row(i){return '<li><span class="n">'+esc(DATA[i][0])+'</span><span class="p">'+fmt(DATA[i][1])+'<small>د.ع</small></span></li>'}
+function run(){
+  const t=norm(q.value);
+  clr.hidden=!q.value;
+  if(!t){meta.textContent=fmt(DATA.length)+' مادة. اكتب للبحث أو اضغط مسح.';list.innerHTML=DATA.slice(0,15).map((_,i)=>row(i)).join('');return}
+  let out=[],total=0;
+  if(/^\d{6,}$/.test(t)){
+    const k=t.replace(/^0+/,'');
+    const seen=new Set();
+    DATA.forEach((r,i)=>{if(r[2].some(b=>b.replace(/^0+/,'').includes(k))){seen.add(i)}});
+    out=[...seen];total=out.length;out=out.slice(0,LIMIT);
+  }else{
+    const words=t.split(' ');
+    for(let i=0;i<IDX.length;i++){
+      let ok=true;for(const w of words){if(IDX[i].indexOf(w)<0){ok=false;break}}
+      if(ok){total++;if(out.length<LIMIT)out.push(i)}
+    }
+  }
+  if(!total){meta.textContent='';list.innerHTML='<li class="empty">ما لقيت مادة بهذا الاسم أو الباركود. جرب كلمة أقصر أو إملاء ثاني.</li>';return}
+  meta.textContent=total>LIMIT?('ظهر أول '+LIMIT+' من '+fmt(total)+' نتيجة. زد كلمة لتضييق البحث.'):(fmt(total)+' نتيجة');
+  list.innerHTML=out.map(row).join('');
+}
+q.addEventListener('input',run);
+clr.addEventListener('click',()=>{q.value='';run();q.focus()});
+run();
+
+// ---- scanner ----
+const ov=$('ov'),res=$('res');
+let scanner=null,last='',lastT=0,libLoading=null;
+function loadLib(){
+  if(window.Html5Qrcode)return Promise.resolve();
+  if(libLoading)return libLoading;
+  libLoading=new Promise((ok,no)=>{
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js';
+    s.onload=ok;s.onerror=()=>{libLoading=null;no(new Error('lib'))};
+    document.head.appendChild(s);
+  });
+  return libLoading;
+}
+function showResult(code){
+  const k=code.replace(/^0+/,'');
+  const hits=BC.get(k);
+  if(!hits){res.innerHTML='<div class="bad">هذا الباركود غير موجود في القائمة</div><div class="rb">'+esc(code)+'</div>';return}
+  res.innerHTML=hits.slice(0,3).map(i=>'<div style="margin-bottom:8px"><div class="rn">'+esc(DATA[i][0])+'</div><div class="rp">'+fmt(DATA[i][1])+'<small>د.ع</small></div></div>').join('')+'<div class="rb">'+esc(code)+'</div>';
+}
+function onCode(text){
+  const now=Date.now();
+  if(text===last&&now-lastT<2500){lastT=now;return}
+  last=text;lastT=now;showResult(text);
+  try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}
+}
+async function openScan(){
+  ov.hidden=false;
+  res.innerHTML='<div class="hint">جاري فتح الكاميرا...</div>';
+  try{
+    await loadLib();
+  }catch(e){res.innerHTML='<div class="bad">ما كدرت أحمّل أداة القراءة. تأكد من الإنترنت أول مرة.</div>';return}
+  try{
+    const F=Html5QrcodeSupportedFormats;
+    scanner=new Html5Qrcode('reader',{formatsToSupport:[F.EAN_13,F.EAN_8,F.UPC_A,F.UPC_E,F.CODE_128,F.CODE_39],useBarCodeDetectorIfSupported:true,verbose:false});
+    await scanner.start({facingMode:'environment'},{fps:12,qrbox:(w,h)=>({width:Math.floor(w*0.85),height:Math.floor(Math.min(h*0.5,w*0.45))})},onCode,()=>{});
+    res.innerHTML='<div class="hint">وجّه الكاميرا نحو الباركود. السعر يطلع هنا.</div>';
+  }catch(e){
+    res.innerHTML='<div class="bad">ما اشتغلت الكاميرا. اسمح للمتصفح باستخدامها من إعدادات الجهاز ثم جرب مرة ثانية.</div>';
+  }
+}
+async function closeScan(){
+  ov.hidden=true;
+  if(scanner){try{await scanner.stop();scanner.clear()}catch(e){}scanner=null}
+}
+$('scan').addEventListener('click',openScan);
+$('stop').addEventListener('click',closeScan);
+
+(function(){var el=document.getElementById('upd');if(!el)return;var u=window.UPDATED;if(!u){el.textContent='';return}
+el.textContent='آخر تحديث: '+u;var d=new Date(u.replace(' ','T'));if(!isNaN(d)&&(Date.now()-d.getTime())>2*86400000){el.textContent+=' (متأخر)';el.style.color='var(--bad)'}})();
+if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
+</script>
+</body>
+</html>
