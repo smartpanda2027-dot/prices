@@ -183,7 +183,8 @@ $('scan').addEventListener('click',openScan);
 $('stop').addEventListener('click',closeScan);
 
 (function(){var el=document.getElementById('upd');if(!el)return;var u=window.UPDATED;if(!u){el.textContent='';return}
-el.textContent='آخر تحديث: '+u;var d=new Date(u.replace(' ','T'));if(!isNaN(d)&&(Date.now()-d.getTime())>2*86400000){el.textContent+=' (متأخر)';el.style.color='var(--bad)'}})();
+el.textContent='آخر تحديث: '+u;var d=new Date(u.replace(' ','T'));if(!isNaN(d)&&(Date.now()-d.getTime())>8*86400000){el.textContent+=' (متأخر)';el.style.color='var(--bad)'}})();
+openScan();
 if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>
 </body>

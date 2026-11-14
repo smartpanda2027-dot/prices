@@ -1,5 +1,5 @@
 // غيّر رقم النسخة عند كل تحديث للأسعار حتى يحمّل الجهاز الملفات الجديدة
-const VER = 'prices-v3';
+const VER = 'prices-v4';
 const FILES = ['./', './index.html', './scan.html', './manifest-scan.json', './data.js', './manifest.json', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 const LIB = 'https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js';
 
@@ -17,10 +17,8 @@ self.addEventListener('fetch', e => {
     return;
   }
   if (new URL(u).origin !== location.origin) return;
-  if (new URL(u).pathname.endsWith('/data.js')) {
-    e.respondWith(fetch(e.request).then(r => { const cp = r.clone(); caches.open(VER).then(c => c.put(e.request, cp)); return r; })
-      .catch(() => caches.match(e.request, {ignoreSearch: true})));
-    return;
-  }
-  e.respondWith(caches.match(e.request, {ignoreSearch: true}).then(hit => hit || fetch(e.request)));
+  // network first, so pages and prices are always fresh; cache is the offline fallback
+  e.respondWith(fetch(e.request).then(r => {
+    const cp = r.clone(); caches.open(VER).then(c => c.put(e.request, cp)); return r;
+  }).catch(() => caches.match(e.request, {ignoreSearch: true})));
 });

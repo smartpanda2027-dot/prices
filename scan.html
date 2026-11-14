@@ -34,7 +34,7 @@ body{display:flex;flex-direction:column;padding-left:env(safe-area-inset-left,0p
 </style>
 </head>
 <body>
-<div id="top"><div><b>مسح الأسعار</b><br><small id="upd" style="color:#ffffffb0;font-size:12px"></small></div><a href="index.html">بحث بالاسم</a></div>
+<div id="top"><div><b>مسح الأسعار</b><br><small id="upd" style="color:#ffffffb0;font-size:12px"></small></div></div>
 <div id="reader"><button id="start" type="button" hidden>ابدأ المسح</button></div>
 <div id="res"><div class="hint">جاري فتح الكاميرا...</div></div>
 <script src="data.js"></script>
@@ -75,7 +75,7 @@ async function go(){
 startBtn.addEventListener('click',go);
 go();
 (function(){var el=document.getElementById('upd');if(!el)return;var u=window.UPDATED;if(!u){el.textContent='';return}
-el.textContent='آخر تحديث: '+u;var d=new Date(u.replace(' ','T'));if(!isNaN(d)&&(Date.now()-d.getTime())>2*86400000){el.textContent+=' (متأخر)';el.style.color='var(--bad)'}})();
+el.textContent='آخر تحديث: '+u;var d=new Date(u.replace(' ','T'));if(!isNaN(d)&&(Date.now()-d.getTime())>8*86400000){el.textContent+=' (متأخر)';el.style.color='var(--bad)'}})();
 if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>
 </body>
