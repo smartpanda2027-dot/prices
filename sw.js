@@ -1,5 +1,5 @@
 // غيّر رقم النسخة عند كل تحديث للأسعار حتى يحمّل الجهاز الملفات الجديدة
-const VER = 'prices-v4';
+const VER = 'prices-v5';
 const FILES = ['./', './index.html', './scan.html', './manifest-scan.json', './data.js', './manifest.json', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 const LIB = 'https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js';
 
