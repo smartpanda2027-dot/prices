@@ -52,7 +52,11 @@ function showResult(code){
   res.innerHTML=hits.slice(0,3).map(i=>'<div style="margin-bottom:8px"><div class="rn">'+esc(DATA[i][0])+'</div><div class="rp">'+fmt(DATA[i][1])+'<small>د.ع</small></div></div>').join('')+'<div class="rb">'+esc(code)+'</div>';
 }
 let last='',lastT=0;
-function onCode(t){const n=Date.now();if(t===last&&n-lastT<2500){lastT=n;return}last=t;lastT=n;showResult(t);try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}}
+let ac=null;
+function unlockAudio(){try{if(!ac)ac=new (window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume()}catch(e){}}
+['touchstart','click'].forEach(e=>addEventListener(e,unlockAudio,{passive:true}));
+function beep(ok){try{if(!ac)return;const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=ok?1800:400;g.gain.value=0.25;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+(ok?0.12:0.3))}catch(e){}}
+function onCode(t){const n=Date.now();if(t===last&&n-lastT<2500){lastT=n;return}last=t;lastT=n;showResult(t);beep(BC.has((t).replace(/^0+/,'')));try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}}
 let stream=null,running=false,runId=0,vid=null,box=null,libLoading=null;
 const cv=document.createElement('canvas'),cx=cv.getContext('2d',{willReadFrequently:true});
 function loadLib(){
